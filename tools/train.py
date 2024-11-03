@@ -3,7 +3,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
-from mmgraph.runners.runner import Runner, GCNDataLoader
+from mmgraph.engine.runners.runner import Runner, GCNDataLoader
 from torch_geometric.datasets import Planetoid
 from mmgraph.registry import MODELS, DATASETS
 from torch_geometric.transforms import NormalizeFeatures

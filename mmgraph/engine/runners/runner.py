@@ -1,11 +1,15 @@
 from mmengine.runner import Runner as mmengine_Runner
-import mmengine.runner
 import torch_geometric.data
-from ..registry import RUNNERS
+from ...registry import RUNNERS
 from typing import Tuple, Union, Dict, Optional
 from torch.utils.data import DataLoader
 import torch_geometric
-from ..registry import DATASETS
+from ...registry import DATASETS
+from mmengine.logging import HistoryBuffer
+import torch
+from mmengine.utils import is_list_of
+import mmengine
+
 
 class GCNDataLoader(DataLoader):
     """
@@ -45,11 +49,31 @@ class Runner(mmengine_Runner):
             return GCNDataLoader(**dataloader)
         
     
-def _update_losses(data: torch_geometric.data.Data, losses: dict) -> Tuple[list, dict]:
+
+def _update_losses(outputs: torch_geometric.data.Data, losses: dict) -> Tuple[torch_geometric.data.Data, dict]:
     """Update and record the losses of the network.
 
-    """
-    return data, losses
+    Args:
+        outputs (torch_geometric.data.Data): The outputs of the network.
+        losses (dict): The losses of the network.
 
-import mmengine
+    Returns:
+        torch_geometric.data.Data: The updated outputs of the network.
+        dict: The updated losses of the network.
+    """
+    if 'loss' in outputs.keys():
+        loss = outputs.loss  # type: ignore
+    else:
+        loss = dict()
+
+    for loss_name, loss_value in loss.items():
+        if loss_name not in losses:
+            losses[loss_name] = HistoryBuffer()
+        if isinstance(loss_value, torch.Tensor):
+            losses[loss_name].update(loss_value.item())
+        elif is_list_of(loss_value, torch.Tensor):
+            for loss_value_i in loss_value:
+                losses[loss_name].update(loss_value_i.item())
+    return outputs, losses
+
 mmengine.runner.loops._update_losses = _update_losses

@@ -1,7 +1,7 @@
 import unittest
 
 import torch
-from mmgraph.runners.runner import Runner, GCNDataLoader
+from mmgraph.engine.runners.runner import Runner, GCNDataLoader
 from torch_geometric.datasets import Planetoid
 from mmgraph.registry import MODELS
 from torch_geometric.transforms import NormalizeFeatures
