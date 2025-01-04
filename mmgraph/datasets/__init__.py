@@ -1,1 +1,1 @@
-from .planetoid import Planetoid
+from .planetoid import *

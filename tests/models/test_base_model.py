@@ -1,19 +1,19 @@
 import unittest
 import torch
-from torch_geometric.datasets import Planetoid
+from mmgraph.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 from mmgraph.models.base_model import GNNBaseModel
 from mmgraph.registry import MODELS
 from mmengine.registry import OPTIM_WRAPPERS
-
+from mmgraph.engine.runners import GCNDataLoader
 class TestGNNBaseModel(unittest.TestCase):
     def setUp(self):
         # Load the Cora dataset
         self.dataset = Planetoid(root='/tmp/Cora', name='Cora', transform=NormalizeFeatures())
-        self.data = self.dataset
+        self.data= next(iter(GCNDataLoader(self.dataset)))
 
         # Define model components
-        head = dict(
+        core = dict(
             type='GCN',
             in_channels=self.dataset.num_features,
             hidden_channels=16,
@@ -24,8 +24,8 @@ class TestGNNBaseModel(unittest.TestCase):
 
         self.model = MODELS.build(dict(
             type='GNNBaseModel',
-            head=head
-        )).cuda()
+            core=core
+        ))
         # Initialize the model
 
     def test_initialization(self):

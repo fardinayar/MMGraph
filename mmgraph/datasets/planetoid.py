@@ -1,13 +1,7 @@
 from ..registry import DATASETS
-from torch_geometric.datasets import Planetoid as Planetoid_pyg
+from torch_geometric.datasets import Planetoid
 
 
 
 
-@DATASETS.register_module()
-class Planetoid:
-    def __init__(self, *args, **kwargs):
-        self.data = Planetoid_pyg(*args, **kwargs)[0]
-
-    def __getattr__(self, name):
-        return getattr(self.data, name)
+DATASETS.register_module('Planetoid', module=Planetoid)

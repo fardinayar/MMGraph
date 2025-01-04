@@ -20,29 +20,46 @@ class ForwardMode(Enum):
 @MODELS.register_module()
 class GNNBaseModel(BaseModel):
     """Base model for all GNN models classes.
-    All GNN models has an optional feature extractor and a head to input class logits. 
+    All GNN models has an optional feature extractor and a core to input class logits. 
     There also an optinal post_processer.
-
-    Args:
-        BaseModel (_type_): _description_
     """
     def __init__(self,
-                 head: dict,
+                 core: dict,
                  feature_extractor: Optional[dict] = None,
                  post_processer: Optional[dict] = None,
                  data_preprocessor: Optional[dict] = None,
                  init_cfg: Optional[dict] = None):
-        
+        """
+        Initialize the GNNBaseModel.
+
+        This constructor sets up the core components of the GNN model, including
+        the core, feature extractor, post-processor, and data preprocessor.
+
+        Args:
+            core (dict): Configuration for the core GNN model.
+            feature_extractor (Optional[dict], optional): Configuration for the feature extractor. 
+                If None, no feature extractor is used. Defaults to None.
+            post_processer (Optional[dict], optional): Configuration for the post-processor. 
+                If None, no post-processor is used. Defaults to None.
+            data_preprocessor (Optional[dict], optional): Configuration for the data preprocessor. 
+                If None, a default BaseGNNDataPreprocessor is used. Defaults to None.
+            init_cfg (Optional[dict], optional): Initialization configuration passed to the parent class. 
+                Defaults to None.
+
+        Returns:
+            None
+        """
         super().__init__(init_cfg)
-        
+
+                
         if data_preprocessor is None:
-            data_preprocessor = dict(type='BaseGNNDataPreprocessor')
-        self.data_preprocessor = MODELS.build(data_preprocessor)
-        
+            self.data_preprocessor = MODELS.build(dict(type='BaseGNNDataPreprocessor'))
+
+
         if feature_extractor is not None:
             self.feature_extractor = MODELS.build(feature_extractor)
-            
-        self.head = MODELS.build(head)
+
+        self.core = MODELS.build(core)
         if post_processer is not None:
             self.post_processer = MODELS.build(post_processer)
     
@@ -64,7 +81,7 @@ class GNNBaseModel(BaseModel):
         simple inference processes.
 
         This method processes the input graph data through the feature extractor
-        and head, and optionally applies post-processing. The input data is
+        and the core, and optionally applies post-processing. The input data is
         modified in-place.
 
         Args:
@@ -78,10 +95,10 @@ class GNNBaseModel(BaseModel):
         Returns:
             torch_geometric.data.Data: The processed graph data (same object as input),
             containing new or updated fields:
-                - 'logits': The output logits from the head.
-                - 'features': The features extracted by the feature extractor or head.
-                - 'losses': A dictionary containing loss values from the head.
-                - Additional fields may be added or modified by the head or post-processor.
+                - 'logits': The output logits from the core.
+                - 'features': The features extracted by the feature extractor or core.
+                - 'losses': A dictionary containing loss values from the core.
+                - Additional fields may be added or modified by the core or post-processor.
 
         Raises:
             AssertionError: If mode is 'loss' and target_mask is not provided.
@@ -89,8 +106,8 @@ class GNNBaseModel(BaseModel):
 
         Note:
             - The input 'data' object is modified in-place. No new Data object is created.
-            - When mode is 'loss', the head computes and stores loss information in the data object.
-            - For 'predict' and 'tensor' modes, the head processes without loss computation.
+            - When mode is 'loss', the core computes and stores loss information in the data object.
+            - For 'predict' and 'tensor' modes, the core processes without loss computation.
             - If a post-processor is defined, it is applied to the data before returning,
             potentially adding or modifying more fields.
         """
@@ -100,16 +117,19 @@ class GNNBaseModel(BaseModel):
                 mode = ForwardMode(mode)
             except ValueError:
                 raise ValueError(f"Invalid mode: {mode}. Must be one of {', '.join([m.value for m in ForwardMode])}")
-
+        
         if self.has_feature_extractor:
             self.feature_extractor(data)
             
+            
         if mode == ForwardMode.LOSS:
             assert target_mask is not None, "You must provide 'target_mask' when mode is 'loss'"
-            self.head.forward(data, target_mask, mode='loss')
+            self.core.forward(data, target_mask, mode=ForwardMode.LOSS.value)
+        elif mode == ForwardMode.PREDICT:
+            self.core.forward(data, mode=ForwardMode.PREDICT.value)
         else:
-            self.head.forward(data, mode=mode.value)
-
+            self.core.forward(data, mode=ForwardMode.TENSOR.value)
+            
         if self.has_post_processer:
             self.post_processer(data)
             

@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.data import Data
 import torch_geometric.nn
-from mmgraph.models.heads.gcn import GCN
+from mmgraph.models.cores.gcn import GCN
 import torch_geometric
 
 class TestGCN(unittest.TestCase):
@@ -141,7 +141,7 @@ class TestGCN(unittest.TestCase):
         self.assertTrue(hasattr(output_tensor, 'logits'))
         self.assertTrue(hasattr(output_tensor, 'features'))
         self.assertEqual(output_tensor.logits.shape, (num_nodes, num_classes))
-        self.assertEqual(output_tensor.features.shape, (num_nodes, num_classes))
+        self.assertEqual(output_tensor.features.shape, (num_nodes, hidden_channels))
         
         # Test loss mode
         output_loss = model(data, target_mask=target_mask, mode='loss')

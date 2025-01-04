@@ -14,17 +14,17 @@ import mmengine
 class GCNDataLoader(DataLoader):
     """
     A dummy dataloader for GCN that mimics PyTorch DataLoader behavior.
-    It works with single torch_geometric.data.Data objects.
+    It works with single torch_geometric.data.Dataset objects.
     """
 
-    def __init__(self, dataset: torch_geometric.data.Data, **kwargs):
-        self.data = dataset if isinstance(dataset, torch_geometric.data.Data) else DATASETS.build(dataset)
+    def __init__(self, dataset: torch_geometric.data.Dataset, **kwargs):
+        self.data = dataset if isinstance(dataset, torch_geometric.data.Dataset) else DATASETS.build(dataset)
         self.batch_size = 1
         self.num_workers = 0
         self.pin_memory = False
 
     def __iter__(self):
-        yield self.data
+        yield self.data[0]
 
     def __len__(self):
         return 1

@@ -1,5 +1,5 @@
 import unittest
-from mmgraph.datasets import Planetoid
+from torch_geometric.datasets import Planetoid
 from mmgraph.registry import DATASETS
 from torch_geometric.data import Data
 
@@ -17,9 +17,9 @@ class TestPlanetoid(unittest.TestCase):
             self.assertTrue(hasattr(self.planetoid_instance, attr))
 
     def test_planetoid_data_shape(self):
-        self.assertGreater(self.planetoid_instance.num_nodes, 0)
-        self.assertGreater(self.planetoid_instance.num_edges, 0)
-        self.assertGreater(self.planetoid_instance.num_features, 0)
+        self.assertGreater(self.planetoid_instance[0].num_nodes, 0)
+        self.assertGreater(self.planetoid_instance[0].num_edges, 0)
+        self.assertGreater(self.planetoid_instance[0].num_features, 0)
 
     def test_planetoid_different_datasets(self):
         cora = Planetoid(name='Cora', root='/tmp/Cora')
