@@ -12,7 +12,7 @@ core = dict(
     hidden_channels=64,
     num_classes=7,
     num_layers=2,
-    layer={'type': 'GCNConv'}
+    layer={'type': 'GATv2Conv'}
 )
 
 model = dict(
