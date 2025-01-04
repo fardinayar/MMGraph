@@ -1,5 +1,5 @@
 import torch_geometric.data
-from ..registry import MODELS
+from ...registry import MODELS
 from mmengine.model import BaseModel
 from torch_geometric.nn import GCNConv
 import torch.nn as nn
@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Optional, Union, Dict
 import torch_geometric
 from mmengine.optim import OptimWrapper
-from .data_preprocessors import BaseGNNDataPreprocessor
+from ..data_preprocessors import BaseGNNDataPreprocessor
 
 class ForwardMode(Enum):
     LOSS = 'loss'

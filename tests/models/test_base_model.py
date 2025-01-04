@@ -2,7 +2,7 @@ import unittest
 import torch
 from mmgraph.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
-from mmgraph.models.base_model import GNNBaseModel
+from mmgraph.models.base_models.gnn_base_model import GNNBaseModel
 from mmgraph.registry import MODELS
 from mmengine.registry import OPTIM_WRAPPERS
 from mmgraph.engine.runners import GCNDataLoader
