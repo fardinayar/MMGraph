@@ -3,7 +3,6 @@ from mmengine.evaluator import BaseMetric
 import torch_geometric.data
 from ...registry import METRICS
 # TODO
-from mmengine.registry import METRICS
 import torch
 import numpy as np
 import torch_geometric 
@@ -31,15 +30,15 @@ class AccuracyMetric(BaseMetric):
                  prefix: str = None) -> None:
         super().__init__(collect_device, prefix)
 
-    def process(self, data: torch_geometric.data.Data, *args ,**kwargs) -> None:
+    def process(self, data_samples: torch_geometric.data.Data, *args ,**kwargs) -> None:
         """Process one batch of data samples and predictions.
 
         Args:
-            data (torch_geometric.data.Data): A torch_geometric.data.Data instance containing 'pred' and 'y' keys.
+            data_samples (torch_geometric.data.Data): A torch_geometric.data.Data instance containing 'pred' and 'y' keys.
         """
         
-        pred = data.pred
-        label = data.y
+        pred = data_samples.pred
+        label = data_samples.y
 
         # Ensure pred and label are on the same device
         if pred.device != label.device:

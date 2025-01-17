@@ -1,9 +1,8 @@
 import unittest
-
 import torch
 from mmgraph.engine.runners.runner import Runner, GCNDataLoader
 from torch_geometric.datasets import Planetoid
-from mmgraph.registry import MODELS
+from mmgraph.registry import MODELS, TRANSFORMS
 from torch_geometric.transforms import NormalizeFeatures
 
 class TestRunner(unittest.TestCase):
@@ -28,6 +27,7 @@ class TestRunner(unittest.TestCase):
 
         # Create a config dictionary
         self.config = dict(
+            default_scope = 'mmgraph',
             work_dir='/tmp/test_runner',
             model=self.model,
             train_dataloader=dict(
@@ -40,10 +40,12 @@ class TestRunner(unittest.TestCase):
                 dataset=self.data,
             ),
             train_cfg=dict(by_epoch=True, max_epochs=10),
-            test_evaluator=dict(type='AccuracyMetric'),
-            test_cfg=dict(),
+            test_evaluator=dict(type='Evaluator', metrics=dict(
+                type='AccuracyMetric'
+                )),
+            test_cfg=dict(type='TestLoop'),
             val_evaluator=dict(type='AccuracyMetric'),
-            val_cfg=dict(),
+            val_cfg=dict(type='ValLoop'),
             optim_wrapper=dict(type='OptimWrapper', optimizer=dict(type='AdamW', lr=0.01)),
         )
 
@@ -82,6 +84,21 @@ class TestRunner(unittest.TestCase):
         runner.test()
         # Check if testing has been performed
         self.assertTrue(hasattr(runner, 'test_evaluator'))
+        
+    def test_tta(self):
+        tta_model = MODELS.build(dict(
+            type='TTAModel', module=self.model)
+                                 )
+        transforms = TRANSFORMS.build(
+            dict(type='TTACompose',transforms=[dict(type='NodeFeatureMasking'), dict(type='NodeFeatureMasking')])
+            )
+    
+        data = Planetoid(root='/tmp/Cora', name='Cora', transform=transforms)
+        config = self.config.copy()
+        config['model'] = tta_model
+        config['test_dataloader']['dataset'] = data
+        runner = Runner(**config)
+        runner.test()
 
 
 if __name__ == '__main__':

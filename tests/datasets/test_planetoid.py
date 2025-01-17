@@ -1,7 +1,6 @@
 import unittest
 from torch_geometric.datasets import Planetoid
 from mmgraph.registry import DATASETS
-from torch_geometric.data import Data
 
 class TestPlanetoid(unittest.TestCase):
     @classmethod

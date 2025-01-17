@@ -61,10 +61,7 @@ def _update_losses(outputs: torch_geometric.data.Data, losses: dict) -> Tuple[to
         torch_geometric.data.Data: The updated outputs of the network.
         dict: The updated losses of the network.
     """
-    if 'loss' in outputs.keys():
-        loss = outputs.loss  # type: ignore
-    else:
-        loss = dict()
+    loss = dict()
 
     for loss_name, loss_value in loss.items():
         if loss_name not in losses:

@@ -30,8 +30,12 @@ test_dataloader=dict(
     dataset=dataset,
 )
 train_cfg=dict(by_epoch=True, max_epochs=10)
-test_evaluator=dict(type='AccuracyMetric')
+test_evaluator=dict(type='Evaluator', metrics=dict(
+                type='AccuracyMetric'
+                )),
 test_cfg=dict()
-val_evaluator=dict(type='AccuracyMetric')
+test_evaluator=dict(type='Evaluator', metrics=dict(
+                type='AccuracyMetric'
+                )),
 val_cfg=dict()
 optim_wrapper=dict(type='OptimWrapper', optimizer=dict(type='AdamW', lr=0.01))
